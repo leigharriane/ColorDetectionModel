@@ -51,6 +51,12 @@ while(1):
 	brown_upper = np.array([70, 255, 255], np.uint8) 
 	brown_mask = cv2.inRange(hsvFrame, brown_lower, brown_upper) 
 	
+	# Set range for grey color and 
+	# define mask 
+	grey_lower = np.array([0, 0, 0], np.uint8) 
+	grey_upper = np.array([180, 50, 200], np.uint8) 
+	grey_mask = cv2.inRange(hsvFrame, grey_lower, grey_upper) 
+
 	# Morphological Transform, Dilation 
 	# for each color and bitwise_and operator 
 	# between imageFrame and mask determines 
@@ -77,11 +83,17 @@ while(1):
 	res_black = cv2.bitwise_and(imageFrame, imageFrame, 
 							mask = black_mask) 
 
-	# For blue color 
+	# For brown color 
 	brown_mask = cv2.dilate(brown_mask, kernel) 
 	res_brown = cv2.bitwise_and(imageFrame, imageFrame, 
 							mask = brown_mask) 
 
+	# For grey color 
+	grey_mask = cv2.dilate(grey_mask, kernel) 
+	res_grey = cv2.bitwise_and(imageFrame, imageFrame, 
+							mask = grey_mask) 
+							
+	
 	# Creating contour to track red color 
 	# contours, hierarchy = cv2.findContours(red_mask, 
 	# 									cv2.RETR_TREE, 
@@ -165,6 +177,21 @@ while(1):
 						cv2.FONT_HERSHEY_SIMPLEX, 
 						1.0, (35, 86, 50)) 
 
+	# Creating contour to track grey color 
+	contours, hierarchy = cv2.findContours(grey_mask, 
+										cv2.RETR_TREE, 
+										cv2.CHAIN_APPROX_SIMPLE) 
+	for pic, contour in enumerate(contours): 
+		area = cv2.contourArea(contour) 
+		if(area > 300): 
+			x, y, w, h = cv2.boundingRect(contour) 
+			imageFrame = cv2.rectangle(imageFrame, (x, y), 
+									(x + w, y + h), 
+									(128, 128, 128), 2) 
+			cv2.putText(imageFrame, "garbage", (x, y), 
+						cv2.FONT_HERSHEY_SIMPLEX, 
+						1.0, (35, 86, 50)) 
+			
 	# Program Termination 
 	cv2.imshow("Multiple Color Detection in Real-TIme", imageFrame) 
 	if cv2.waitKey(10) & 0xFF == ord('q'): 
