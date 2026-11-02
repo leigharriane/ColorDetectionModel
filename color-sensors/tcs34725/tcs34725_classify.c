@@ -1,3 +1,25 @@
+/**
+ * tcs34725_classify.c - Colour classification with a TCS34725 (I2C) sensor
+ *
+ * Target : Raspberry Pi Pico 2 W (see CMakeLists.txt), Pico SDK 2.2.0
+ * Output : USB serial (printf), one line every ~250 ms
+ *
+ * Reads the clear/red/green/blue 16-bit counts, divides R, G and B by the
+ * clear count so the ratios are mostly independent of brightness, and maps
+ * them to a colour name with simple threshold rules (black/white/grey first
+ * by saturation and brightness, then brown, then the dominant channel).
+ *
+ * Same sensor family and register map as ../tcs3472/tcs3472_classify.c; that
+ * version additionally waits for the data-valid flag and checks read errors.
+ *
+ * Wiring (I2C0):  SDA -> GP4, SCL -> GP5, VIN -> 3V3, GND -> GND.
+ * Address 0x29.  Tie the breakout's LED pin to GND to switch its LED off.
+ *
+ * Serial line format:
+ *   NAME    | C:<raw> R:<raw> G:<raw> B:<raw> | rn:<R/C> gn:<G/C> bn:<B/C>
+ * Use the ratios to retune the constants in classify_color().
+ */
+
 #include <stdio.h>
 #include <math.h>
 #include <stdint.h>

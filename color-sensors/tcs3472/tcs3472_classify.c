@@ -1,10 +1,46 @@
+/**
+ * tcs3472_classify.c - Colour classification with a TCS3472x (I2C) sensor
+ *
+ * Target : Raspberry Pi Pico (RP2040), Pico SDK 2.2.0
+ * Output : USB serial (printf), one line every ~250 ms
+ *
+ * The TCS3472x family (TCS34721/3/5/7) integrates four photodiode channels
+ * (red, green, blue, clear) and exposes 16-bit counts over I2C.  This program
+ * configures a 50 ms integration time and 4x gain, waits for each conversion
+ * to become valid, reads C/R/G/B, normalises R, G and B by the clear count,
+ * and maps the ratios to a colour name with threshold rules.
+ *
+ * The TCS34725 board under ../tcs34725 runs the same register map; the two
+ * projects differ only in target board and in this one's extra read-validity
+ * and error handling.
+ *
+ * Wiring (I2C0 on the default pins; edit SDA_PIN/SCL_PIN if needed):
+ *
+ *   Sensor pin   Pico pin    Notes
+ *   ----------   ---------   -----------------------------------------
+ *   SDA          GP4         pulled up internally here; most boards add 10k
+ *   SCL          GP5
+ *   VIN / VCC    3V3         GND -> GND
+ *   LED          (optional)  tie to GND to turn the on-board white LED off
+ *
+ * I2C address is fixed at 0x29.  On start-up the chip ID register is printed
+ * (0x44 for TCS34721/5, 0x4D for TCS34723/7); any other value usually means a
+ * wiring or address problem.
+ *
+ * Serial line format:
+ *   NAME    | C:<raw> R:<raw> G:<raw> B:<raw> | rn:<R/C> gn:<G/C> bn:<B/C>
+ *
+ * Tune classify_color() using the printed ratios and the clear count while
+ * holding known objects at the working distance.
+ */
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 
-// -------------------- Pico 2 I2C --------------------
+// -------------------- I2C wiring (i2c0) --------------------
 #define I2C_PORT i2c0
 #define SDA_PIN  4
 #define SCL_PIN  5
@@ -117,7 +153,7 @@ static inline float min3(float a, float b, float c) {
     return m;
 }
 
-// ---------- Your classifier (unchanged) ----------
+// ---------- Heuristic colour classifier (ratios relative to clear) ----------
 static const char* classify_color(uint16_t c, uint16_t r_raw, uint16_t g_raw, uint16_t b_raw) {
     if (c < 120) return "BLACK";
 

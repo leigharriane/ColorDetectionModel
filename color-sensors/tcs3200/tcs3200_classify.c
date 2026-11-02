@@ -1,3 +1,38 @@
+/**
+ * tcs3200_classify.c - Colour classification with a TCS3200 / TCS230 sensor
+ *
+ * Target : Raspberry Pi Pico (RP2040), Pico SDK 2.2.0
+ * Output : USB serial (printf), one line per measurement cycle
+ *
+ * The TCS3200 has no digital bus.  It emits a square wave whose frequency is
+ * proportional to the light reaching one of four photodiode groups (red,
+ * green, blue or clear/unfiltered).  Each cycle this program:
+ *   1. selects a filter with S2/S3 and waits for the output to settle,
+ *   2. counts rising edges on OUT for a fixed window to measure frequency,
+ *   3. repeats for all four filters,
+ *   4. normalises R, G and B by the clear reading (so brightness and distance
+ *      matter less) and maps the ratios to a colour name with threshold rules.
+ *
+ * Wiring (edit the PIN_* defines below if yours differs):
+ *
+ *   TCS3200 pin   Pico GPIO   Purpose
+ *   -----------   ---------   -----------------------------------------
+ *   S0            GP2         } output-frequency scaling, fixed at 20 %
+ *   S1            GP3         }
+ *   S2            GP4         } photodiode filter select
+ *   S3            GP5         }
+ *   OUT           GP6         frequency output, counted via GPIO interrupt
+ *   VCC           3V3         GND -> GND
+ *   OE (if any)   GND         active-low output enable; tie low to enable
+ *
+ * Serial line format (about 0.7 s per line):
+ *   NAME    | C:<Hz> R:<Hz> G:<Hz> B:<Hz> | rn:<R/C> gn:<G/C> bn:<B/C>
+ *
+ * The rn/gn/bn ratios are what classify_color() thresholds on.  To retune,
+ * hold known-colour objects in front of the sensor, note the ratios and the
+ * clear frequency, and adjust the constants in classify_color().
+ */
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>

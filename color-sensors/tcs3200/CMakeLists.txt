@@ -1,4 +1,8 @@
-# Generated Cmake Pico project file
+# TCS3200 colour classifier - Raspberry Pi Pico (RP2040)
+#
+# Build with the Raspberry Pi Pico VS Code extension (open this folder), or:
+#   cmake -S . -B build -G Ninja && ninja -C build
+# then copy build/tcs3200_classify.uf2 to the Pico in BOOTSEL mode.
 
 cmake_minimum_required(VERSION 3.13)
 
@@ -21,36 +25,33 @@ if (EXISTS ${picoVscode})
 endif()
 # ====================================================================================
 
-# ✅ Regular Pico (RP2040)
 set(PICO_BOARD pico CACHE STRING "Board type")
 
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
-project(test-tcs3472 C CXX ASM)
+project(tcs3200_classify C CXX ASM)
 
-# Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
-# Add executable
-add_executable(test-tcs3472
-    test-tcs3472.c
+add_executable(tcs3200_classify
+    tcs3200_classify.c
 )
 
-pico_set_program_name(test-tcs3472 "test-tcs3472")
-pico_set_program_version(test-tcs3472 "0.1")
+pico_set_program_name(tcs3200_classify "tcs3200_classify")
+pico_set_program_version(tcs3200_classify "0.1")
 
-# ✅ Enable USB serial so printf() works over the USB cable
-pico_enable_stdio_usb(test-tcs3472 1)
-pico_enable_stdio_uart(test-tcs3472 0)
+# printf() goes over the USB cable, not the UART pins.
+pico_enable_stdio_usb(tcs3200_classify 1)
+pico_enable_stdio_uart(tcs3200_classify 0)
 
-target_link_libraries(test-tcs3472
+# The TCS3200 is a frequency-output sensor: only GPIO is needed (part of pico_stdlib).
+target_link_libraries(tcs3200_classify
     pico_stdlib
-    hardware_i2c
 )
 
-target_include_directories(test-tcs3472 PRIVATE
+target_include_directories(tcs3200_classify PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}
 )
 
-pico_add_extra_outputs(test-tcs3472)
+pico_add_extra_outputs(tcs3200_classify)

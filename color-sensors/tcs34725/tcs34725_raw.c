@@ -1,3 +1,18 @@
+/**
+ * tcs34725_raw.c - Wiring smoke test for a TCS34725 colour sensor
+ *
+ * Target : Raspberry Pi Pico 2 W (see CMakeLists.txt), Pico SDK 2.2.0
+ * Output : USB serial, "C:<n> R:<n> G:<n> B:<n>" four times a second
+ *
+ * Minimal program that initialises the sensor over I2C (50 ms integration,
+ * 4x gain) and streams the raw 16-bit clear/red/green/blue counts.  Use it
+ * first to confirm wiring and the I2C address, then flash
+ * tcs34725_classify.c for the colour-naming version.
+ *
+ * Wiring (I2C0):  SDA -> GP4, SCL -> GP5, VIN -> 3V3, GND -> GND.
+ * Address 0x29.  The chip ID printed at boot should be 0x44 (or 0x4D).
+ */
+
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
