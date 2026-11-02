@@ -1,3 +1,14 @@
+# LEGACY - kept for reference only.
+#
+# This is the first version of the webcam detector, adapted from a
+# "Multiple Color Detection in Real-Time" OpenCV tutorial.  It builds one
+# mask per colour by hand and repeats the contour/draw block five times.
+#
+# It was superseded by ../detect_multicolor.py, which does the same job
+# with a single loop over the colour table in ../color_ranges.py.  The HSV
+# ranges below correspond to the "original" profile there.  Nothing imports
+# this file; it still runs on its own with `python multicolor_original.py`.
+
 # Python code for Multiple Color Detection 
 
 
