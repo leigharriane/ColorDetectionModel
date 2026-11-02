@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Pico SDK / CMake build output (one build/ per firmware project)
+build/
+
+# Editor-generated settings at the repo root (the per-project .vscode/ folders
+# under color-sensors/ are part of the firmware projects and stay tracked)
+/.vscode/
